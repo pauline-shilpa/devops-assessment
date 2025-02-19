@@ -32,14 +32,27 @@ resource "aws_security_group" "web_sg" {
 
 # Create an EC2 Instance
 resource "aws_instance" "web_server" {
-  ami           = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI 
+  ami           = "ami-0c55b159cbfafe1f0" 
   instance_type = "t2.micro"  
   security_groups = [aws_security_group.web_sg.name]
-  key_name      = "your-key-pair"  # ⚠️ Replace with your AWS key pair name
+  key_name      = "your-key-pair"  
 
   # Install Apache Web Server 
   user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
               sudo yum install -y httpd
-              echo "<
+              echo "<h1> Hello, World! </h1>" | sudo tee /var/www/html/index.html
+              sudo systemctl start httpd
+              sudo systemctl enable httpd
+              EOF
+
+  tags = {
+    Name = "Terraform-WebServer"
+  }
+}
+
+# Output the Public IP of the EC2 Instance
+output "instance_public_ip" {
+  value = aws_instance.web_server.public_ip
+}
